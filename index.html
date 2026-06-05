@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download Spotify tracks and playlists as tagged MP3 files.">
+    <title>AudioFlux</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="bg-mesh" aria-hidden="true">
+        <div class="grid-floor"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"></canvas>
+        <div class="noise"></div>
+    </div>
+
+    <div class="page-shell">
+        <header class="site-header">
+            <div class="shell-wide header-inner">
+                <a href="/" class="logo">
+                    <img class="logo-icon-img" src="assets/spotify-logo.png" alt="" width="40" height="40" decoding="async">
+                    <span class="logo-text">AudioFlux</span>
+                </a>
+                <span class="header-pill">Free · No signup</span>
+            </div>
+        </header>
+
+        <main class="shell-wide hero-home">
+            <section class="hero-stage" id="hero-stage">
+                <div class="hero-grid">
+                    <div class="hero-main">
+                        <div class="hero-copy">
+                            <p class="hero-badge anim-fade-up" style="--delay: 0.05s">
+                                <span class="badge-dot"></span>
+                                Spotify → MP3
+                            </p>
+                            <h1 class="main-title anim-fade-up" style="--delay: 0.1s">
+                                Download your
+                                <span class="highlight">music</span>
+                                <span class="title-line">in seconds</span>
+                            </h1>
+                            <p class="subtitle anim-fade-up" style="--delay: 0.18s">
+                                Paste a track, playlist, or album link. Get tagged MP3 files with cover art.
+                            </p>
+                            <ul class="hero-chips anim-fade-up" style="--delay: 0.24s" aria-label="Supported link types">
+                                <li>Single tracks</li>
+                                <li>Playlists</li>
+                                <li>Albums</li>
+                            </ul>
+                        </div>
+
+                        <section class="downloader-section anim-fade-up" style="--delay: 0.28s">
+                            <div class="downloader-widget glass-panel" id="downloader-widget">
+                                <div class="widget-label">
+                                    <span class="widget-label-icon" aria-hidden="true">↓</span>
+                                    Paste your link
+                                </div>
+                                <form id="download-form" class="input-group">
+                                    <div class="input-wrap">
+                                        <span class="input-icon" aria-hidden="true">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                                        </span>
+                                        <input type="url" id="url-input" placeholder="https://open.spotify.com/..." autocomplete="off" required>
+                                    </div>
+                                    <button type="submit" class="download-btn" id="submit-btn">
+                                        <span class="btn-label">Look up</span>
+                                        <span class="btn-shine" aria-hidden="true"></span>
+                                    </button>
+                                </form>
+
+                                <div id="status-area" class="status-area reveal-panel hidden">
+                                    <div class="loader-ring" aria-hidden="true"><span></span><span></span></div>
+                                    <p class="status-text" id="status-text">Processing your link...</p>
+                                </div>
+
+                                <div id="progress-panel" class="progress-panel reveal-panel hidden">
+                                    <div class="progress-header">
+                                        <span id="progress-label">Downloading...</span>
+                                        <span id="progress-percent">0%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-fill" id="progress-fill">
+                                            <span class="progress-glow" aria-hidden="true"></span>
+                                        </div>
+                                    </div>
+                                    <p class="progress-message" id="progress-message"></p>
+                                </div>
+
+                                <div id="result-area" class="result-area reveal-panel hidden">
+                                    <div id="track-view">
+                                        <div class="result-card">
+                                            <div class="result-img-wrapper">
+                                                <img id="result-img" src="" alt="Cover art">
+                                                <div class="img-glow" aria-hidden="true"></div>
+                                            </div>
+                                            <div class="result-info">
+                                                <h3 id="result-title">Song Title</h3>
+                                                <p id="result-artist">Artist</p>
+                                                <p id="result-notice" class="result-notice hidden"></p>
+                                                <div id="candidates-section" class="candidates-section hidden">
+                                                    <p class="candidates-heading">Pick a match</p>
+                                                    <div id="candidates-list" class="candidates-list" role="radiogroup" aria-label="YouTube matches"></div>
+                                                </div>
+                                                <div id="preview-panel" class="preview-panel hidden">
+                                                    <div class="preview-header">
+                                                        <span class="preview-heading">Preview</span>
+                                                        <span id="preview-status" class="preview-status">Verify this is the correct song</span>
+                                                    </div>
+                                                    <div class="preview-body">
+                                                        <div class="preview-info">
+                                                            <span id="preview-title" class="preview-title">—</span>
+                                                            <span id="preview-meta" class="preview-meta"></span>
+                                                        </div>
+                                                        <div id="preview-embed-wrap" class="preview-embed-wrap hidden">
+                                                            <iframe id="preview-embed" title="YouTube preview" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                                        </div>
+                                                        <audio id="preview-audio" class="preview-audio hidden" controls preload="none"></audio>
+                                                    </div>
+                                                    <p class="preview-hint">Video plays instantly — verify the match, then download.</p>
+                                                </div>
+                                                <div class="download-options">
+                                                    <button type="button" class="btn-primary hidden" id="btn-mp3"><span>Download MP3</span></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="playlist-view" class="hidden">
+                                        <div class="playlist-header">
+                                            <div class="result-img-wrapper playlist-cover">
+                                                <img id="playlist-img" src="" alt="Playlist cover">
+                                                <div class="img-glow" aria-hidden="true"></div>
+                                            </div>
+                                            <div class="playlist-info">
+                                                <h3 id="playlist-title">Playlist</h3>
+                                                <p id="playlist-meta" class="playlist-meta"></p>
+                                                <button type="button" class="btn-primary" id="btn-playlist-download"><span>Download all as ZIP</span></button>
+                                            </div>
+                                        </div>
+                                        <ul id="playlist-tracks" class="playlist-tracks"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="hero-visual anim-fade-up" style="--delay: 0.2s" aria-hidden="true">
+                        <div class="visual-orbit"></div>
+                        <div class="mock-player">
+                            <div class="mock-player-top">
+                                <span class="mock-live">Ready</span>
+                                <div class="mock-dots"><i></i><i></i><i></i></div>
+                            </div>
+                            <div class="mock-player-body">
+                                <div class="mock-cover">
+                                    <img src="assets/spotify-logo.png" alt="">
+                                    <div class="mock-cover-shine"></div>
+                                </div>
+                                <div class="mock-details">
+                                    <span class="mock-label">Now playing</span>
+                                    <span class="mock-track">Your Spotify link</span>
+                                    <span class="mock-artist">High quality MP3</span>
+                                    <div class="equalizer" aria-hidden="true">
+                                        <span style="--i:0"></span>
+                                        <span style="--i:1"></span>
+                                        <span style="--i:2"></span>
+                                        <span style="--i:3"></span>
+                                        <span style="--i:4"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mock-progress">
+                                <div class="mock-progress-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="site-footer">
+            <p>Not affiliated with Spotify AB</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
