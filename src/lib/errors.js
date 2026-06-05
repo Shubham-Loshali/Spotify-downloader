@@ -20,7 +20,7 @@ function formatUserError(error) {
         return 'YouTube blocked this request. Try another match or try again later.';
     }
 
-    if (/video unavailable|private video|has been removed|copyright|blocked/i.test(technical)) {
+    if (/video unavailable|this video is unavailable|private video|has been removed/i.test(technical)) {
         return 'This video is unavailable on YouTube. Try another match.';
     }
 

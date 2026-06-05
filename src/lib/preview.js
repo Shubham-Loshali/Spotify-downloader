@@ -1,7 +1,7 @@
 const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const youtubedl = require('youtube-dl-exec');
-const { YT_OPTS } = require('./download');
+const { YT_OPTS, AUDIO_FORMAT } = require('./youtube');
 
 const previewUrlCache = new Map();
 const PREVIEW_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -23,9 +23,10 @@ async function getYouTubePreviewUrl(videoUrl) {
 
     const url = await youtubedl(videoUrl, {
         ...YT_OPTS,
-        format: 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best',
+        format: AUDIO_FORMAT,
         getUrl: true,
-        noPlaylist: true
+        noPlaylist: true,
+        extractorArgs: 'youtube:player_client=android,web'
     });
 
     const streamUrl = String(url).trim();
