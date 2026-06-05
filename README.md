@@ -84,33 +84,6 @@ Open **http://localhost:3000** in your browser.
 
 ---
 
-## API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Service health check |
-| `GET` | `/api/resolve?url=` | Parse and validate a Spotify URL |
-| `GET` | `/api/info?url=&platform=spotify` | Fetch track, playlist, or album metadata with YouTube candidates |
-| `GET` | `/api/preview?videoUrl=` | Resolve a direct preview stream URL |
-| `GET` | `/api/preview/stream?videoUrl=` | Proxy audio stream for in-browser preview |
-| `POST` | `/api/jobs` | Start a download job (`mode`: `track` or `playlist`) |
-| `GET` | `/api/jobs/:id` | Poll job status and progress |
-| `GET` | `/api/jobs/:id/file` | Download the completed MP3 or ZIP file |
-
-### Example: start a track download
-
-```bash
-curl -X POST http://localhost:3000/api/jobs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "mode": "track",
-    "spotifyUrl": "https://open.spotify.com/track/EXAMPLE",
-    "videoUrl": "https://www.youtube.com/watch?v=EXAMPLE"
-  }'
-```
-
----
-
 ## Project Structure
 
 ```
