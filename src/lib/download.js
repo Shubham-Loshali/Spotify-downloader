@@ -2,12 +2,17 @@ const path = require('path');
 const fsp = require('fs').promises;
 const youtubedl = require('youtube-dl-exec');
 const ffmpegPath = require('ffmpeg-static');
+const { formatUserError } = require('./errors');
 
 const YT_OPTS = {
     noWarnings: true,
     noCallHome: true,
     preferFreeFormats: true,
-    ffmpegLocation: ffmpegPath
+    ffmpegLocation: ffmpegPath,
+    extractorArgs: 'youtube:player_client=android,web',
+    retries: 3,
+    fragmentRetries: 3,
+    socketTimeout: 30
 };
 
 async function downloadYouTubeToFile(videoUrl, outputMp3Path, onProgress) {
@@ -38,7 +43,12 @@ async function downloadYouTubeToFile(videoUrl, outputMp3Path, onProgress) {
     subprocess.stdout?.on('data', handleChunk);
     subprocess.stderr?.on('data', handleChunk);
 
-    await subprocess;
+    try {
+        await subprocess;
+    } catch (error) {
+        console.error('yt-dlp download failed:', error.stderr || error.message);
+        throw new Error(formatUserError(error));
+    }
 
     const files = await fsp.readdir(dir);
     const audio = files.find(f => f.startsWith(base) && /\.(mp3|m4a|opus|webm)$/i.test(f));

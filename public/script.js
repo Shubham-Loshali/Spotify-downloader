@@ -413,6 +413,12 @@ document.addEventListener('DOMContentLoaded', () => {
         openPanel(resultArea);
     }
 
+    function showNotice(message, { error = false } = {}) {
+        resultNotice.textContent = message;
+        resultNotice.classList.toggle('is-error', error);
+        resultNotice.classList.remove('hidden');
+    }
+
     async function pollJob(jobId) {
         return new Promise((resolve, reject) => {
             stopPolling();
@@ -550,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const videoUrl = getSelectedVideoUrl() || selectedVideoUrl;
         if (!videoUrl) {
-            alert('Select a YouTube match from the list first.');
+            showNotice('Select a YouTube match from the list first.', { error: true });
             return;
         }
 
@@ -583,10 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 job.filename || buildFallbackFilename()
             );
             updateProgress(100, `Saved: ${filename}`, 'Done');
-            resultNotice.textContent = `Downloaded with ID3 tags: ${filename}`;
-            resultNotice.classList.remove('hidden');
+            showNotice(`Downloaded with ID3 tags: ${filename}`);
         } catch (error) {
-            alert(error.message || 'Download failed.');
+            showNotice(error.message || 'Download failed.', { error: true });
             showProgress(false);
         } finally {
             btnMp3.disabled = false;
@@ -624,9 +629,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 job.filename || buildFallbackFilename('zip')
             );
             updateProgress(100, `ZIP ready: ${filename}`, 'Done');
-            alert(`Playlist downloaded as ${filename}`);
+            showNotice(`Playlist downloaded as ${filename}`);
         } catch (error) {
-            alert(error.message || 'Playlist download failed.');
+            showNotice(error.message || 'Playlist download failed.', { error: true });
             showProgress(false);
         } finally {
             btnPlaylistDownload.disabled = false;

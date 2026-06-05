@@ -10,6 +10,7 @@ const { createJob, updateJob, getJob, listJobSnapshot } = require('./lib/jobs');
 const { tagMp3 } = require('./lib/id3');
 const { downloadYouTubeToFile, YT_OPTS } = require('./lib/download');
 const { getYouTubePreviewUrl, proxyYouTubeAudio } = require('./lib/preview');
+const { formatUserError } = require('./lib/errors');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -499,7 +500,9 @@ async function runTrackJob(job, spotifyUrl, videoUrl) {
             message: 'Download ready!'
         });
     } catch (error) {
-        updateJob(job, { status: 'error', error: error.message, message: error.message });
+        const message = formatUserError(error);
+        console.error('Track job error:', error.stderr || error.message);
+        updateJob(job, { status: 'error', error: message, message });
         if (job.tmpDir) {
             await fsp.rm(job.tmpDir, { recursive: true, force: true }).catch(() => {});
         }
@@ -579,7 +582,9 @@ async function runPlaylistJob(job, collectionUrl, collectionType) {
             message: `Done! ${downloaded.length} tracks${skipped ? ` (${skipped} skipped)` : ''}.`
         });
     } catch (error) {
-        updateJob(job, { status: 'error', error: error.message, message: error.message });
+        const message = formatUserError(error);
+        console.error('Playlist job error:', error.stderr || error.message);
+        updateJob(job, { status: 'error', error: message, message });
         if (job.tmpDir) {
             await fsp.rm(job.tmpDir, { recursive: true, force: true }).catch(() => {});
         }

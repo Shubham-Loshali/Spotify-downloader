@@ -1004,6 +1004,14 @@ body.has-results .hero-visual .mock-player {
     margin-bottom: 0.85rem !important;
 }
 
+.result-notice.is-error {
+    color: #ffb4b4;
+    background: rgba(255, 80, 80, 0.12);
+    border: 1px solid rgba(255, 120, 120, 0.28);
+    border-radius: 10px;
+    padding: 0.65rem 0.8rem;
+}
+
 .candidates-heading {
     font-size: 0.75rem;
     font-weight: 600;
