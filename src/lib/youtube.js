@@ -1,12 +1,20 @@
 const ffmpegPath = require('ffmpeg-static');
 
 const AUDIO_FORMAT = 'bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best';
-const PLAYER_CLIENTS = ['android,web', 'ios', 'mweb', 'web'];
+const PLAYER_CLIENTS = [
+    'android,web',
+    'tv_embedded',
+    'ios',
+    'mweb',
+    'android_vr',
+    'web'
+];
 
 const YT_OPTS = {
     noWarnings: true,
     noCallHome: true,
     ffmpegLocation: ffmpegPath,
+    remoteComponents: 'ejs:github',
     retries: 3,
     fragmentRetries: 3,
     socketTimeout: 30

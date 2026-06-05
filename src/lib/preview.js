@@ -1,7 +1,7 @@
 const { Readable } = require('stream');
 const { pipeline } = require('stream/promises');
 const youtubedl = require('youtube-dl-exec');
-const { YT_OPTS, AUDIO_FORMAT } = require('./youtube');
+const { YT_OPTS, AUDIO_FORMAT, PLAYER_CLIENTS, STREAM_HEADERS } = require('./youtube');
 
 const previewUrlCache = new Map();
 const PREVIEW_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -21,32 +21,34 @@ async function getYouTubePreviewUrl(videoUrl) {
     const cached = getCachedPreviewUrl(videoUrl);
     if (cached) return cached;
 
-    const url = await youtubedl(videoUrl, {
-        ...YT_OPTS,
-        format: AUDIO_FORMAT,
-        getUrl: true,
-        noPlaylist: true,
-        extractorArgs: 'youtube:player_client=android,web'
-    });
+    let lastError = null;
+    for (const client of PLAYER_CLIENTS) {
+        try {
+            const url = await youtubedl(videoUrl, {
+                ...YT_OPTS,
+                format: AUDIO_FORMAT,
+                getUrl: true,
+                noPlaylist: true,
+                extractorArgs: `youtube:player_client=${client}`
+            });
 
-    const streamUrl = String(url).trim();
-    if (!streamUrl.startsWith('http')) {
-        throw new Error('Could not resolve preview stream.');
+            const streamUrl = String(url).trim();
+            if (streamUrl.startsWith('http')) {
+                setCachedPreviewUrl(videoUrl, streamUrl);
+                return streamUrl;
+            }
+        } catch (error) {
+            lastError = error;
+            console.warn(`Preview URL failed (${client}):`, error.stderr || error.message);
+        }
     }
 
-    setCachedPreviewUrl(videoUrl, streamUrl);
-    return streamUrl;
+    throw lastError || new Error('Could not resolve preview stream.');
 }
 
 async function proxyYouTubeAudio(req, res, videoUrl) {
     const streamUrl = await getYouTubePreviewUrl(videoUrl);
-    const headers = {
-        'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        Accept: '*/*',
-        Referer: 'https://www.youtube.com/',
-        Origin: 'https://www.youtube.com'
-    };
+    const headers = { ...STREAM_HEADERS };
 
     if (req.headers.range) {
         headers.Range = req.headers.range;
