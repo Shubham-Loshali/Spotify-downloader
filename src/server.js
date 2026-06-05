@@ -12,6 +12,7 @@ const { downloadYouTubeToFile, YT_OPTS } = require('./lib/download');
 const { getYouTubePreviewUrl, proxyYouTubeAudio } = require('./lib/preview');
 
 const PORT = process.env.PORT || 3000;
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const MAX_PLAYLIST_TRACKS = 25;
 
 const SPOTIFY_HOSTS = new Set(['open.spotify.com', 'spotify.com', 'play.spotify.com']);
@@ -754,10 +755,10 @@ app.get('/api/jobs/:id/file', (req, res) => {
 });
 
 app.get('/', (_req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
 
-app.use(express.static(__dirname));
+app.use(express.static(PUBLIC_DIR));
 
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
